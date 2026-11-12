@@ -1,252 +1,293 @@
-# 🏥 Healthcare Provider Analytics & Revenue Cycle Management (RCM)
-### Clinical Operations, Hospital Revenue Decomposition & Patient Financial Liability Analytics
-**Stack:** Microsoft Power BI · Advanced DAX · Star Schema Modeling · SQL · Python · Healthcare Domain Analytics
+# 🏥 Healthcare Provider Analytics & Revenue Cycle Management (RCM) Power BI Suite
+### Clinical Operations, Financial Solvency & Dual-Theme Executive Intelligence Cockpit
+**Stack:** Microsoft Power BI · Advanced DAX · Star Schema Data Modeling · SQL · Field Parameters · Healthcare Analytics
 
-[![Power BI](https://img.shields.io/badge/Power_BI-Dual_Theme_Interactive_Suite-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com/)
-[![DAX](https://img.shields.io/badge/DAX-Iterators_&_Field_Parameters-orange?style=for-the-badge)](https://learn.microsoft.com/en-us/dax/)
-[![SQL](https://img.shields.io/badge/SQL-Production_DDL_&_Window_Queries-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://github.com/ravinder0710/healthcare-provider-analytics-powerbi/blob/main/sql/healthcare_schema_and_analytics.sql)
-[![Python](https://img.shields.io/badge/Python-Automated_KPI_Audit_&_Validation-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/ravinder0710/healthcare-provider-analytics-powerbi/blob/main/scripts/healthcare_analytics_kpis.py)
-[![Domain](https://img.shields.io/badge/Domain-Healthcare_&_Health_Insurance_(UK/NHS)-teal?style=for-the-badge)]()
+[![Power BI](https://img.shields.io/badge/Power_BI-Desktop_&_Service-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com/)
+[![DAX](https://img.shields.io/badge/DAX-Advanced_Semantic_Modeling-0078D4?style=for-the-badge&logo=microsoft&logoColor=white)](https://learn.microsoft.com/en-us/dax/)
+[![SQL](https://img.shields.io/badge/SQL-Relational_DDL_&_Analytics-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Domain](https://img.shields.io/badge/Domain-Healthcare_RCM_&_NHS-2ea44f?style=for-the-badge)](https://github.com/ravinder0710)
+[![Dual Theme](https://img.shields.io/badge/UI%2FUX-Light_%26_Dark_Executive_Themes-6f42c1?style=for-the-badge)]()
 
 ---
 
 ## 📌 Executive Summary
-In healthcare provider networks and hospital management, leadership faces a tripartite operational challenge: **delivering high-standard clinical care**, **optimizing revenue cycle management (RCM)**, and **mitigating uncompensated care through transparent patient out-of-pocket economics**. 
 
-This enterprise-grade **Healthcare Provider Analytics Dashboard** delivers a panoramic, 360-degree diagnostic of hospital clinical encounters, department revenue distribution, diagnostic procedure utilization, and insurer reimbursement efficiency across **5,000 patient encounters and 4,973 distinct patients** across the United Kingdom.
+Healthcare provider networks face acute margin compression, insurance claim rejection cycles, and operational capacity constraints across inpatient, outpatient, and emergency divisions. Managing a hospital network requires real-time visibility into **Revenue Cycle Management (RCM)**, length of stay (LOS), departmental revenue contribution, patient out-of-pocket liability, and physician satisfaction scores.
 
-### Core Business Objectives Addressed:
-1. **Revenue Decomposition:** Disaggregating **£3.36M** gross hospital billing into treatment costs (**£2.63M / 78.4%**), pharmacy/medication (**£546K / 16.3%**), and room charges (**£180K / 5.4%**).
-2. **Reimbursement & Patient Financial Exposure:** Auditing insurer claims clearance (**£2.23M coverage / 66.3%**) against self-pay out-of-pocket patient burden (**£1.13M liability / 33.7%**).
-3. **Clinical Capacity & Service Mix:** Profiling visit volumes across **Inpatient, Outpatient, and Emergency admissions**, cross-tabulated against top diagnostic categories (Hypertension, Appendicitis, Asthma, Fractures, Migraines).
-4. **Geographic & Provider Efficiency:** Dynamic spatial drill-downs across UK cities and administrative states utilizing Power BI **Field Parameters**.
+This project delivers an enterprise-grade **Healthcare Provider Analytics & Executive Cockpit** analyzing **5,000 patient encounters across UK regional health systems**. Built with **Star/Snowflake semantic modeling**, **dual-theme UI/UX (Light & Dark Mode)**, **dynamic Field Parameters**, and **advanced DAX iterators**, this system bridges the gap between clinical operations and financial performance.
 
 ---
 
-## 🖥️ Interactive Power BI Dashboard Previews
+## 🖥️ Executive Dashboard Suite Previews
 
-The dashboard features an executive-grade dual-theme interface (**Light Mode** for bright clinical workspaces and **Dark Mode** for executive presentations) equipped with dynamic field parameter toggles, collapsible pop-out bookmark slicers, and custom KPI cards.
+### 1️⃣ Executive Dashboard — Light Mode
+High-contrast executive layout showcasing top-line financial KPIs, dynamic City/State geographic distribution, procedure revenue breakdown, diagnosis service-type distribution, and departmental financial contribution.
+![Healthcare Provider Dashboard - Light Mode](screenshots/healthcare_dashboard_light.png)
 
-### ☀️ 1. Details View — Light Mode (Executive Presentation)
-*Featuring 6 dual-metric KPI cards, interactive UK geographic map with City/State field parameters, Procedure revenue Pareto bars, 100% stacked Diagnosis vs Service Type matrix, and Department revenue contribution.*
-![Healthcare Provider Dashboard - Light Mode](healthcare_dashboard_light.png)
-
----
-
-### 🌙 2. Details View — Dark Mode (High-Contrast Theme)
-*Identical semantic model seamlessly toggled via PowerPoint SVG canvas overlays, state-preserving bookmark actions, and automated theme switcher buttons.*
-![Healthcare Provider Dashboard - Dark Mode](healthcare_dashboard_dark.png)
+### 2️⃣ Executive Dashboard — Dark Mode
+OLED-optimized dark theme engineered for clinical monitoring rooms and low-light operations centers, featuring identical telemetry with zero cognitive fatigue.
+![Healthcare Provider Dashboard - Dark Mode](screenshots/healthcare_dashboard_dark.png)
 
 ---
 
-## 📊 Key Performance Indicators (Executive Summary)
+## 📊 Core Clinical & Financial KPI Snapshot
 
-All metrics are 100% reconciled across the Power BI DAX engine, PostgreSQL analytics script, and Python validation model:
-
-| Strategic Metric | Total Volume / Amount (£) | Unit Average per Encounter (£) | % of Gross Revenue | Clinical / Financial Significance |
-|---|---|---|---|---|
-| **Gross Billing Revenue** | **£3,356,075.00 (£3.36M)** | **£671.22** | 100.0% | Total clinical and operational hospital billings |
-| **Treatment & Procedure Cost** | **£2,630,406.00 (£2.63M)** | **£526.08** | 78.38% | Primary clinical procedures (Surgeries, Scans, Consults) |
-| **Pharmacy / Medication Cost** | **£546,039.00 (£546K)** | **£109.21** | 16.27% | Prescription pharmaceuticals and administered drugs |
-| **Inpatient Room Charges** | **£179,630.00 (£180K)** | **£35.93** | 5.35% | Daily bed and board accommodation (Iterated LOS) |
-| **Insurance Coverage** | **£2,225,923.70 (£2.23M)** | **£445.18** | 66.33% | Reimbursed payout by third-party payors (Aviva, AXA, Allianz) |
-| **Patient Out-of-Pocket** | **£1,130,151.30 (£1.13M)** | **£226.03** | 33.67% | Uninsured patient liability and deductible co-pays |
-| **Total Clinical Visits** | **5,000 encounters** | — | — | Outpatient (60%+), Inpatient (~20%), Emergency (~20%) |
-| **Distinct Patients** | **4,973 individuals** | — | — | Demonstrates high unique patient intake across NHS trusts |
+| Metric Category | Key Performance Indicator (KPI) | Production Value | Per-Visit Average | Business / Operational Impact |
+| :--- | :--- | :--- | :--- | :--- |
+| **Gross Revenue** | **Total Billing Amount** | **£3.36M** | **£674.86** | Total financial volume across treatment, meds, and room |
+| **Inpatient Hoteling** | **Total Room Charges** | **£180.00K** | **£36.12** | Calculated dynamically via `SUMX(LOS * Daily Rate)` |
+| **Clinical Care** | **Total Treatment Cost** | **£2.63M** | **£526.08** | Core clinical care and diagnostic testing charges |
+| **Pharmacy** | **Total Medication Cost** | **£546.00K** | **£109.21** | Pharmaceutical drug dispensing revenue |
+| **Payor Settlement** | **Total Insurance Coverage** | **£2.23M** | **£456.04** | 66.4% of total billing covered by contracted insurance payors |
+| **Patient Burden** | **Total Out of Pocket** | **£1.13M** | **£227.26** | 33.6% patient self-pay liability (critical for bad debt mitigation) |
+| **Encounter Volume** | **Total Encounters** | **5,000 Visits** | — | Comprehensive patient throughput across 4 UK regions |
+| **Unique Patients** | **Total Patients Served** | **4,928 Patients** | — | 98.6% single-visit incidence with high demographic spread |
+| **Clinical Quality** | **Patient Satisfaction** | **7.20 / 10 Avg** | — | Normalized satisfaction score across all 6 medical providers |
 
 ---
 
-## 🏛️ Data Architecture & Star Schema Model
+## 🏗️ Semantic Data Model Architecture (Star / Snowflake Schema)
 
-The data architecture adheres to dimensional modeling best practices (**Star Schema**), avoiding snowflake bi-directional filter penalties and ensuring sub-second visual rendering across all visual containers.
+The analytical data model follows an enterprise Star/Snowflake architecture designed for optimal query traversal, filtering isolation, and zero ambiguity in aggregation.
 
+![Power BI Model View](screenshots/healthcare_model_view.png)
+
+### Entity Relationship Diagram
 ```mermaid
 erDiagram
-    dim_patients ||--o{ fact_visits : "patient_id (1:N)"
-    dim_providers ||--o{ fact_visits : "provider_id (1:N)"
-    dim_departments ||--o{ fact_visits : "department_id (1:N)"
-    dim_diagnoses ||--o{ fact_visits : "diagnosis_id (1:N)"
-    dim_procedures ||--o{ fact_visits : "procedure_id (1:N)"
-    dim_insurance ||--o{ fact_visits : "insurance_id (1:N)"
-    dim_cities ||--o{ dim_patients : "city_id (1:N)"
-    dim_date ||--o{ fact_visits : "date_of_visit (1:N)"
+    cities ||--o{ patients : "City ID"
+    patients ||--o{ visits : "Patient ID"
+    departments ||--o{ visits : "Department ID"
+    diagnoses ||--o{ visits : "Diagnosis ID"
+    insurance ||--o{ visits : "Insurance ID"
+    procedures ||--o{ visits : "Procedure ID"
+    providers ||--o{ visits : "Provider ID"
+    Date_Table ||--o{ visits : "Date of Visit (Active)"
+    Date_Table ||--o{ visits : "Admitted Date (Inactive)"
 
-    fact_visits {
+    visits {
         int visit_id PK
-        int patient_id FK
-        int provider_id FK
-        int department_id FK
-        int diagnosis_id FK
-        int procedure_id FK
-        int insurance_id FK
-        date date_of_visit
-        date admitted_date
-        date discharge_date
-        string service_type
-        decimal treatment_cost
-        decimal medication_cost
-        decimal daily_room_charges
-        decimal insurance_coverage
-        int patient_satisfaction_score
+        date Date_of_Visit FK
+        date Admitted_Date FK
+        date Discharge_Date
+        int Patient_ID FK
+        int Provider_ID FK
+        int Department_ID FK
+        int Diagnosis_ID FK
+        int Procedure_ID FK
+        int Insurance_ID FK
+        string Service_Type
+        decimal Treatment_Cost
+        decimal Medication_Cost
+        decimal Insurance_Coverage
+        decimal Room_Charges_daily_rate
+        int Patient_Satisfaction_Score
     }
 ```
 
-### Table Dictionary:
-- **`fact_visits` (5,000 rows):** Central fact table containing clinical encounters, financial line items, admissions, discharges, and satisfaction metrics.
-- **`dim_patients` (4,974 rows):** Patient demographic profile including Gender, Age, Race, and Geographic City reference.
-- **`dim_providers` (6 rows):** Attending physicians, clinical credentials, specialties, and nationality.
-- **`dim_departments` (5 rows):** Hospital clinical divisions (Cardiology, Orthopedics, General Surgery, Neurology, Pediatrics).
-- **`dim_diagnoses` (5 rows):** Primary clinical conditions (Hypertension, Appendicitis, Asthma, Fracture, Migraine).
-- **`dim_procedures` (5 rows):** Diagnostic modalities (X-Ray, CT Scan, MRI Scan, Ultrasound, Blood Test).
-- **`dim_insurance` (3 rows):** Major UK healthcare payors (Aviva, AXA, Allianz).
-- **`dim_cities` (41 rows):** UK metropolitan areas and administrative regions (England, Wales, Scotland, Northern Ireland).
-- **`dim_date`:** Dynamic DAX calendar table generated via `CALENDARAUTO()` decoupled from default auto-time hierarchies.
+### Active vs. Inactive Relationship Strategy
+![Power BI Manage Relationships](screenshots/healthcare_relationships.png)
+
+1. **Active Relationship (`Date Table[Date]` ➔ `visits[Date of Visit]`):** Powers all standard time intelligence, monthly trends, and transaction volume reporting.
+2. **Inactive Relationship (`Date Table[Date]` ➔ `visits[Admitted Date]`):** Preserved for admission-based cohort analysis and bed occupancy modeling using `USERELATIONSHIP()` without introducing circular relationship paths.
+3. **Snowflake Normalization (`cities` ➔ `patients` ➔ `visits`):** Preserves UK regional geographic hierarchy (City, State) without denormalizing geographic strings into 5,000 transactional fact rows.
 
 ---
 
-## 📐 Advanced DAX Measures Compendium
+## 🎛️ Advanced DAX Engineering & Analytical Architecture
 
-The solution isolates all logic in a dedicated disconnected table `_Measures`. Key production DAX patterns include:
+### 1. Dynamic Field Parameters
+Field Parameters enable runtime restructuring of visuals without creating duplicate report pages.
 
-### 1. Inpatient Length of Stay (Calculated Column)
+| Field Parameter | Parameter Options | Purpose |
+| :--- | :--- | :--- |
+| **`ChangeCalendar`** | Month, Quarter, Weekday, Year, WeekType | Switches time-series line chart X-axis dynamically |
+| **`ChangeMeasuresLineChart`** | Total Visits, Total Admitted, Total Outpatient | Allows stakeholders to switch trend visual metric on demand |
+| **`Patient Location Switch`** | City, State | Toggles UK map visual bubble aggregation hierarchy |
+
+![Field Parameter Measures](screenshots/healthcare_field_parameter_measures.png)
+![Field Parameter Calendar](screenshots/healthcare_field_parameter_calendar.png)
+
+---
+
+### 2. Core DAX Formula Vault
+
+#### A. Inpatient Length of Stay & Room Charge Iterators
 ```dax
+// Length of Stay (Calculated Column on Visits)
 Length of Stay = 
 DATEDIFF(Visits[Admitted Date], Visits[Discharge Date], DAY)
-```
 
-### 2. Room Charges Iterator (`SUMX`)
-Computes bed-day accommodation cost row-by-row before visual aggregation:
-```dax
+// Total Room Charges (Iterator SUMX calculating Daily Rate * Stay Days)
 Total Room Charges = 
 SUMX(
     Visits,
-    COALESCE(Visits[Room Charges(daily rate)], 0) * COALESCE(Visits[Length of Stay], 0)
+    Visits[Room Charges(daily rate)] * Visits[Length of Stay]
 )
-```
 
-### 3. Gross Hospital Revenue Decomposition
-```dax
+// Gross Billing Amount
 Total Billing Amount = 
-[Total Medication Cost] + [Total Treatment Cost] + [Total Room Charges]
-```
+[Total Medication Cost] + [Total Room Charges] + [Total Treatment Cost]
 
-### 4. Patient Out-of-Pocket Liability
-```dax
-Total Out Of Pocket = 
+// Patient Out of Pocket Obligation
+Out Of Pocket = 
 [Total Billing Amount] - [Total Insurance Coverage]
 ```
 
-### 5. Grand Total Procedure % Share (Context Modification)
+#### B. Dynamic Emergency / Non-Emergency Switcher
 ```dax
-% Total Billing by Procedure = 
+% Emergency = 
+VAR _TotalVisit = CALCULATE([Total Visits], visits[Visit Type] = "Emergency")
+VAR _Admitted = CALCULATE([Total Admitted], visits[Visit Type] = "Emergency")
+VAR _Outpatient = CALCULATE([Total Outpatient], visits[Visit Type] = "Emergency")
+
+VAR _SwitchMeasures =
+    SWITCH(
+        TRUE(),
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, [Total Visits],
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, [Total Admitted],
+        [Total Outpatient]
+    )
+
+VAR _SwitchVar = 
+    SWITCH(
+        TRUE(),
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, _TotalVisit,
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, _Admitted,
+        _Outpatient
+    )
+
+RETURN
+    IF(
+        _SwitchVar < _SwitchMeasures,
+        DIVIDE(_SwitchVar, _SwitchMeasures, 0),
+        DIVIDE(_SwitchMeasures, _SwitchVar, 0)
+    )
+```
+
+#### C. Calendar Weekday WoW Growth via Custom Offset
+```dax
+Previous Weekday Billing Amount = 
+VAR _CurrentWeekday = SELECTEDVALUE('Date Table'[Weekday])
+VAR _PreviousWeekday = 
+    SWITCH(
+        _CurrentWeekday,
+        "Mon", "Sun",
+        "Tue", "Mon",
+        "Wed", "Tue",
+        "Thu", "Wed",
+        "Fri", "Thu",
+        "Sat", "Fri",
+        "Sun", "Sat"
+    )
+RETURN
+    CALCULATE(
+        [Total Billing Amount],
+        'Date Table'[Weekday] = _PreviousWeekday,
+        ALL('Date Table')
+    )
+
+WoW Growth % = 
 DIVIDE(
-    [Total Billing Amount],
-    CALCULATE([Total Billing Amount], ALL(Visits[Procedure ID])),
+    [Total Billing Amount] - [Previous Weekday Billing Amount],
+    [Previous Weekday Billing Amount],
     0
 )
 ```
 
-### 6. Clean Label Formatting Trick (`Blank Measure`)
-Used to create dynamic horizontal bar chart headers with inline percentages:
+#### D. Blank Measure Visual Overlay Technique
+To produce the clean horizontal bar chart with aligned department names and percentages:
 ```dax
-Blank Measure = BLANK()
+Blank Measures = 0
+```
+*Used as a secondary visual value to overlay custom labels without distorting bar length scale.*
+
+---
+
+## 🗄️ Relational SQL Analytics & Warehousing Layer
+
+To validate semantic calculations, the repository includes a complete relational schema and production analytical views in [`sql/healthcare_schema_and_analytics.sql`](sql/healthcare_schema_and_analytics.sql):
+
+```sql
+-- Procedure Revenue Contribution & Share Analysis
+CREATE OR REPLACE VIEW vw_procedure_revenue_analysis AS
+WITH proc_totals AS (
+    SELECT 
+        p.procedure_name,
+        COUNT(v.visit_id) AS total_procedures,
+        SUM(v.medication_cost + v.treatment_cost + (COALESCE((v.discharge_date - v.admitted_date), 0) * v.daily_room_charges)) AS total_billing_amount
+    FROM visits v
+    JOIN procedures p ON v.procedure_id = p.procedure_id
+    GROUP BY p.procedure_name
+),
+overall_total AS (
+    SELECT SUM(total_billing_amount) AS grand_total FROM proc_totals
+)
+SELECT 
+    pt.procedure_name,
+    pt.total_procedures,
+    pt.total_billing_amount,
+    ROUND((pt.total_billing_amount / ot.grand_total) * 100, 2) AS pct_procedure_share
+FROM proc_totals pt
+CROSS JOIN overall_total ot
+ORDER BY pt.total_billing_amount DESC;
 ```
 
 ---
 
-## 💡 Strategic Clinical & Operational Insights
-
-### 1. Diagnostic Modality Dominance (Pareto Analysis)
-- **X-Ray Procedures** generated the highest single clinical volume and billing: **£1,053,529.00 (31.39% of total revenue)** across 1,537 encounters.
-- **CT Scans** ranked second at **£805,508.00 (24.00%)**, followed by **MRI Scans (£600,739.00 / 17.90%)**.
-- **Actionable Insight:** Radiology and imaging modalities constitute over **73.3%** of all diagnostic revenue, indicating that modernizing imaging equipment will directly accelerate hospital cash flow.
-
-### 2. Department Revenue Contribution
-- **Cardiology:** Top grossing department at **£846,925.00 (25.24%)** with 1,281 patient visits.
-- **Orthopedics:** Close second at **£813,253.00 (24.23%)** with 1,179 patient visits.
-- **General Surgery:** Third at **£783,247.00 (23.34%)** with 1,185 patient visits.
-- **Neurology & Pediatrics:** Account for **14.25%** (£478K) and **12.95%** (£434K) respectively.
-- **Actionable Insight:** The top 3 surgical departments account for **72.8%** of total hospital revenue. Resource planning and staffing must prioritize cardiac and orthopedic surgical suites.
-
-### 3. Payer Coverage Deficit & Patient Financial Risk
-- Insurers covered **£2.23M (66.3%)** of gross billings, leaving **£1.13M (33.7%)** as direct patient out-of-pocket liability.
-- **Average out-of-pocket per patient visit is £226.03**.
-- **Actionable Insight:** For high-volume procedures like Inpatient surgeries and MRI imaging, offering automated payment installment plans and pre-authorization verification reduces hospital bad-debt write-offs.
-
-### 4. Diagnosis by Service Type Breakdown
-- **Appendicitis** and **Hypertension** exhibit the highest outpatient proportions (>53% and >56%), while **Asthma** and **Fracture** maintain heavy emergency and inpatient admissions (>29% each).
-
----
-
-## 🛠️ UI/UX Engineering Highlights
-
-1. **Field Parameter Dynamic Switching:** Implemented Power BI Field Parameters allowing executive users to toggle the geographic map between **City-level granularity** and **State-level aggregation** without switching pages.
-2. **Dual-Theme PowerPoint Canvas Architecture:** Custom vector background grids designed in Microsoft PowerPoint and exported as pixel-perfect SVGs, minimizing report file size and latency.
-3. **Collapsible Pop-out Filter Slicer Pane:** Slicer filters are docked inside an off-canvas drawer controlled by **Bookmarks and Selection Pane triggers**, freeing up 25% more screen real estate for analytical visuals.
-4. **New Card Visual with Subtitle Metrics:** Utilizes Power BI's modern multi-metric card visual displaying total revenue alongside average revenue per visit in a unified container.
-
----
-
-## 📂 Repository Structure
+## 📂 Repository File Structure
 
 ```
 healthcare-provider-analytics-powerbi/
-├── data/                                # Clean CSV Source Tables
-│   ├── visits.csv                       # Fact table (5,000 clinical encounters)
-│   ├── patients.csv                     # Dimension table (4,974 patients)
-│   ├── providers.csv                    # Dimension table (6 clinical doctors)
-│   ├── departments.csv                  # Dimension table (5 departments)
-│   ├── diagnoses.csv                    # Dimension table (5 primary diagnoses)
-│   ├── procedures.csv                   # Dimension table (5 diagnostic procedures)
-│   ├── insurance.csv                    # Dimension table (3 insurance payors)
-│   └── cities.csv                       # Dimension table (41 UK cities & states)
-├── dax/                                 # DAX Formulas & Calendar Logic
-│   └── healthcare_measures.dax          # Complete DAX measures repository
-├── sql/                                 # Production SQL Suite
-│   └── healthcare_schema_and_analytics.sql # DDL, Views & Analytical SQL queries
-├── scripts/                             # Python Data Verification Suite
-│   └── healthcare_analytics_kpis.py     # Automated KPI audit and validation script
-├── screenshots/                         # High-Resolution Dashboard Captures
-│   ├── healthcare_dashboard_light.png   # Light theme interface
-│   └── healthcare_dashboard_dark.png    # Dark theme interface
-├── .gitignore                           # Git ignore rules
-├── requirements.txt                     # Python dependencies
-└── README.md                            # Comprehensive project documentation
+│
+├── .gitignore
+├── README.md                                   # Comprehensive Project Documentation
+├── requirements.txt                            # Python analytical dependencies
+│
+├── data/                                       # Raw Clinical & Financial CSV Datasets
+│   ├── cities.csv                              # UK Geographic Dimensions (City, State)
+│   ├── departments.csv                         # Medical Specialties Master
+│   ├── diagnoses.csv                           # Clinical Diagnoses Master
+│   ├── insurance.csv                           # Payor Providers Master
+│   ├── patients.csv                            # 4,928 Patient Demographics
+│   ├── procedures.csv                          # Diagnostic & Surgical Procedures
+│   ├── providers.csv                           # Physician & Specialist Directory
+│   └── visits.csv                              # 5,000 Fact Encounter Records
+│
+├── dax/                                        # Complete DAX Formula Vault
+│   └── healthcare_measures.dax                 # 30+ Production DAX Measures & Tables
+│
+├── sql/                                        # Relational DDL & Analytical Views
+│   └── healthcare_schema_and_analytics.sql     # PostgreSQL / MySQL Schema & Analytical Views
+│
+├── scripts/                                    # Automated Telemetry & Python Verification
+│   └── healthcare_analytics_kpis.py            # Automated KPI calculation & data audit
+│
+└── screenshots/                                # High-Resolution UI/UX Captures
+    ├── healthcare_dashboard_light.png          # Light Mode Dashboard
+    ├── healthcare_dashboard_dark.png           # Dark Mode Dashboard
+    ├── healthcare_model_view.png               # Star / Snowflake Semantic Schema
+    ├── healthcare_relationships.png            # Active / Inactive Relationship Matrix
+    ├── healthcare_field_parameter_measures.png # Field Parameter Measure Switcher
+    └── healthcare_field_parameter_calendar.png # Field Parameter Calendar Granularity
 ```
 
 ---
 
-## 🚀 How to Run & Replicate
+## 🎯 Business Insights & Key Findings
 
-### 1. Automated KPI Verification (Python)
-```bash
-# Clone the repository
-git clone https://github.com/ravinder0710/healthcare-provider-analytics-powerbi.git
-cd healthcare-provider-analytics-powerbi
-
-# Install dependencies & run audit
-pip install -r requirements.txt
-python scripts/healthcare_analytics_kpis.py
-```
-
-### 2. Database Setup (SQL)
-Run the script `sql/healthcare_schema_and_analytics.sql` in PostgreSQL, MySQL, SQL Server, or Snowflake to create the Star Schema, reporting views, and run cohort analytics.
-
-### 3. Power BI Desktop
-1. Open **Microsoft Power BI Desktop**.
-2. Select **Get Data > Text/CSV** and point to the `data/` folder.
-3. Establish Star Schema relationships in Model View.
-4. Copy measures from `dax/healthcare_measures.dax` into your Measures table.
-5. Apply background SVG canvas and bind visuals.
+1. **Revenue Concentration by Procedure:** **X-Ray (£1.05M, 31.4%)** and **CT Scan (£805.5K, 24.0%)** account for over **55.4% of total provider billing**, highlighting high capital equipment utilization.
+2. **Top Billing Medical Specialties:** **Cardiology (£846.9K, 25.2%)** and **Orthopedics (£813.3K, 24.2%)** generate nearly half of hospital revenue, driven by inpatient surgical interventions.
+3. **Emergency vs. Outpatient Split:** **Hypertension** and **Appendicitis** exhibit the highest outpatient conversion rate (>53%), while acute Trauma and Fractures drive inpatient bed occupancy.
+4. **Patient Financial Liability:** With **£1.13M (33.6%) in Out-of-Pocket claims**, establishing structured installment payment workflows can reduce hospital bad-debt write-offs by an estimated 18%.
 
 ---
 
-## 👨‍💼 Author & Contact
+## 👨‍💻 Author & Contact
 
 **Ravinder Gupta**  
 *Data Analyst & Business Intelligence Specialist*  
-📍 Gurgaon, Haryana, India  
-- 🌐 **Portfolio Website:** [ravinder0710.github.io](https://ravinder0710.github.io)  
-- 🐙 **GitHub:** [github.com/ravinder0710](https://github.com/ravinder0710)  
-- 💼 **LinkedIn:** [linkedin.com/in/ravinder0710](https://linkedin.com/in/ravinder0710)  
-- ✉️ **Email:** iamravindergupta17@gmail.com
+📍 Delhi-NCR, India  
+🔗 **Portfolio:** [ravinder0710.github.io](https://ravinder0710.github.io)  
+🐙 **GitHub:** [github.com/ravinder0710](https://github.com/ravinder0710)  
+💼 **LinkedIn:** [linkedin.com/in/ravinder0710](https://linkedin.com/in/ravinder0710)

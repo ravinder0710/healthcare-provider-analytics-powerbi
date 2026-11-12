@@ -1,189 +1,446 @@
-/*
-========================================================================================
-HEALTHCARE PROVIDER ANALYTICS & REVENUE CYCLE MANAGEMENT (RCM)
-Power BI DAX Measures Repository
-Author: Ravinder Gupta (ravinder0710)
-Role: Data Analyst & BI Specialist
-Target: NHS UK / Hospital Provider Network Analytics
-========================================================================================
-*/
+/* ==============================================================================================
+   HEALTHCARE PROVIDER ANALYTICS & REVENUE CYCLE MANAGEMENT (RCM) - DAX MEASURES VAULT
+   Author: Ravinder Gupta (Data Analyst & BI Specialist)
+   Dataset: 5,000 Patient Encounters across UK Provider Clinics & Hospitals
+   Architecture: Star/Snowflake Semantic Model with Dynamic Field Parameters & Disconnected Tables
+   ============================================================================================== */
 
-// =====================================================================================
-// 1. DATE TABLE GENERATION (Star Schema Dimension)
-// =====================================================================================
+// ==============================================================================================
+// 1. CORE VOLUME & ADMISSION MEASURES
+// ==============================================================================================
 
+Total Visits = 
+COUNTROWS(Visits)
+
+Total Patients = 
+DISTINCTCOUNT(Visits[Patient ID])
+
+Total Providers = 
+DISTINCTCOUNT(Visits[Provider ID])
+
+Total Outpatient = 
+COUNTBLANK(visits[Length of Stay])
+
+Total Admitted = 
+[Total Visits] - [Total Outpatient]
+
+
+// ==============================================================================================
+// 2. FINANCIAL & REVENUE CYCLE MANAGEMENT (RCM) MEASURES
+// ==============================================================================================
+
+Total Medication Cost = 
+SUM(Visits[Medication Cost])
+
+Total Treatment Cost = 
+SUM(Visits[Treatment Cost])
+
+Total Room Charges = 
+SUMX(
+    Visits,
+    Visits[Room Charges(daily rate)]
+        *
+    Visits[Length of Stay]
+)
+
+Total Billing Amount = 
+[Total Medication Cost]
++
+[Total Room Charges]
++
+[Total Treatment Cost]
+
+Total Insurance Coverage = 
+SUM(Visits[Insurance Coverage])
+
+Out Of Pocket = 
+[Total Billing Amount]
+-
+[Total Insurance Coverage]
+
+
+// ==============================================================================================
+// 3. AVERAGE UNIT ECONOMICS (DUAL-CARD SUBTITLES)
+// ==============================================================================================
+
+Avg Billing Per Visit = 
+DIVIDE([Total Billing Amount], [Total Visits], 0)
+
+Avg Medication Cost = 
+DIVIDE([Total Medication Cost], [Total Visits], 0)
+
+Avg Treatment Cost = 
+DIVIDE([Total Treatment Cost], [Total Visits], 0)
+
+Avg Insurance Coverage = 
+DIVIDE([Total Insurance Coverage], [Total Visits], 0)
+
+Avg Room Charges = 
+DIVIDE([Total Room Charges], [Total Visits], 0)
+
+Avg Out Of Pocket = 
+DIVIDE([Out Of Pocket], [Total Visits], 0)
+
+
+// ==============================================================================================
+// 4. RATIO & CONTRIBUTION MEASURES (% GRAND TOTAL)
+// ==============================================================================================
+
+% Department = 
+DIVIDE(
+    [Total Billing Amount],
+    CALCULATE(
+        [Total Billing Amount],
+        ALL(departments[Department])
+    )
+)
+
+% Procedure = 
+DIVIDE(
+    [Total Billing Amount],
+    CALCULATE(
+        [Total Billing Amount],
+        ALL(procedures[Procedure])
+    )
+)
+
+Active Department = 
+SELECTEDVALUE(departments[Department])
+
+
+// ==============================================================================================
+// 5. EMERGENCY VS. NON-EMERGENCY DYNAMIC SERVICE SPLIT
+// ==============================================================================================
+
+% Emergency = 
+    VAR _TotalVisit = 
+        CALCULATE(
+            [Total Visits],
+            visits[Visit Type] = "Emergency"
+        )
+
+    VAR _Admitted = 
+        CALCULATE(
+            [Total Admitted],
+            visits[Visit Type] = "Emergency"
+        )
+
+    VAR _Outpatient = 
+        CALCULATE(
+            [Total Outpatient],
+            visits[Visit Type] = "Emergency"
+        )
+    VAR _SwitchMeasures =
+        SWITCH(
+            TRUE(),
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order])=0,
+            [Total Visits],
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order])=1,
+            [Total Admitted],
+            [Total Outpatient]
+        )
+
+    VAR _SwitchVar = 
+        SWITCH(
+            TRUE(),
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, _TotalVisit,
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, _Admitted,
+            _Outpatient
+        )
+
+        RETURN
+        IF(
+            _SwitchVar < _SwitchMeasures,
+            DIVIDE(
+                _SwitchVar,
+                _SwitchMeasures,
+                0
+            ),
+            DIVIDE(
+                _SwitchMeasures,
+                _SwitchVar,
+                0
+            )
+        )
+
+% None Emergency = 
+    VAR _TotalVisit = 
+        CALCULATE(
+            [Total Visits],
+            visits[Visit Type] = "None Emergency"
+        )
+
+    VAR _Admitted = 
+        CALCULATE(
+            [Total Admitted],
+            visits[Visit Type] = "None Emergency"
+        )
+
+    VAR _Outpatient = 
+        CALCULATE(
+            [Total Outpatient],
+            visits[Visit Type] = "None Emergency"
+        )
+    VAR _SwitchMeasures =
+        SWITCH(
+            TRUE(),
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order])=0,
+            [Total Visits],
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order])=1,
+            [Total Admitted],
+            [Total Outpatient]
+        )
+
+    VAR _SwitchVar = 
+        SWITCH(
+            TRUE(),
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, _TotalVisit,
+            SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, _Admitted,
+            _Outpatient
+        )
+
+        RETURN
+        IF(
+            _SwitchVar < _SwitchMeasures,
+            DIVIDE(
+                _SwitchVar,
+                _SwitchMeasures,
+                0
+            ),
+            DIVIDE(
+                _SwitchMeasures,
+                _SwitchVar,
+                0
+            )
+        )
+
+% R Emergency = 1.0 - [% Emergency]
+
+% R None Emergency = 1.0 - [% None Emergency]
+
+None Emergency Final = 
+CALCULATE(
+    [Total Outpatient],
+    Visits[Visit Type] = "None Emergency"
+)
+
+
+// ==============================================================================================
+// 6. PATIENT SATISFACTION SCORING
+// ==============================================================================================
+
+Avg Satisfaction Score = 
+-- AvgSatisfactionScorePerProvider
+VAR _Score =
+    AVERAGEX(
+        VALUES(visits[Provider ID]),
+        CALCULATE(AVERAGE(visits[Patient Satisfaction Score]))
+    )
+RETURN 
+    "Avg. Rating " & FORMAT(_Score, "0.00")
+
+Patient Satisfaction Score = 
+-- AvgSatisfactionScorePerProvider
+VAR _Score = 
+    AVERAGEX(
+        VALUES(visits[Provider ID]),
+        CALCULATE(AVERAGE('visits'[Patient Satisfaction Score]))
+    )
+RETURN
+    "Patient Satisfaction Score: " & FORMAT(_Score, "0.00")
+
+
+// ==============================================================================================
+// 7. TIME INTELLIGENCE & GROWTH (MoM / WoW)
+// ==============================================================================================
+
+Previous Month Billing Amount = 
+CALCULATE(
+    [Total Billing Amount],
+    DATEADD('Date Table'[Date], -1, MONTH)
+)
+
+MoM Growth Value = 
+[Total Billing Amount] - [Previous Month Billing Amount]
+
+MoM Growth % = 
+DIVIDE(
+    [Total Billing Amount] - [Previous Month Billing Amount],
+    [Previous Month Billing Amount],
+    0
+)
+
+Previous Weekday Billing Amount = 
+    VAR _CurrentWeekday = SELECTEDVALUE('Date Table'[Weekday])
+    VAR _PreviousWeekday = 
+        SWITCH(
+            _CurrentWeekday,
+            "Mon", "Sun",
+            "Tue", "Mon",
+            "Wed", "Tue",
+            "Thu", "Wed",
+            "Fri", "Thu",
+            "Sat", "Fri",
+            "Sun", "Sat"
+        )
+    RETURN
+        CALCULATE(
+            [Total Billing Amount],
+            'Date Table'[Weekday] = _PreviousWeekday,
+            ALL('Date Table')
+        )
+
+WoW Growth Value = 
+[Total Billing Amount] - [Previous Weekday Billing Amount]
+
+WoW Growth % = 
+DIVIDE(
+    [Total Billing Amount] - [Previous Weekday Billing Amount],
+    [Previous Weekday Billing Amount],
+    0
+)
+
+
+// ==============================================================================================
+// 8. VISUAL OVERLAY & DEBUG HELPERS
+// ==============================================================================================
+
+Blank Measures = 0
+
+Debug Order = 
+SELECTEDVALUE(
+    ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]
+)
+
+Debug TotalVisit = 
+CALCULATE(
+    [Total Visits],
+    Visits[Visit Type] = "None Emergency"
+)
+
+Debug Admitted = 
+CALCULATE(
+    [Total Admitted],
+    Visits[Visit Type] = "None Emergency"
+)
+
+Debug Outpatient = 
+CALCULATE(
+    [Total Outpatient],
+    Visits[Visit Type] = "None Emergency"
+)
+
+Test Emergency = 
+CALCULATE(
+    [Total Visits],
+    Visits[Visit Type] = "Emergency"
+)
+
+Test None Emergency = 
+CALCULATE(
+    [Total Visits],
+    Visits[Visit Type] = "None Emergency"
+)
+
+Test None Emergency Admitted = 
+CALCULATE(
+    [Total Admitted],
+    Visits[Visit Type] = "None Emergency"
+)
+
+Test None Emergency Outpatient = 
+CALCULATE(
+    [Total Outpatient],
+    Visits[Visit Type] = "None Emergency"
+)
+
+
+// ==============================================================================================
+// 9. CALCULATED COLUMNS (ON FACT VISITS)
+// ==============================================================================================
+
+// Column: Length of Stay (Raw Integer Days)
+Length of Stay = 
+DATEDIFF(
+    Visits[Admitted Date],
+    Visits[Discharge Date],
+    DAY
+)
+
+// Column: Length of Stays (Binned / Grouped Range)
+Length of Stays = 
+    VAR _AdmissionsDays = 
+        DATEDIFF(
+            Visits[Admitted Date],
+            Visits[Discharge Date],
+            DAY
+        )
+    VAR _GroupDays = 
+        SWITCH(
+            TRUE(),
+            _AdmissionsDays = 1, "1 Day",
+            _AdmissionsDays <= 4, "2-4",
+            _AdmissionsDays <= 7, "5-7",
+            TRUE(), "8+"
+        )
+    RETURN
+    IF(
+        _AdmissionsDays = BLANK(), "", _GroupDays
+    )
+
+
+// ==============================================================================================
+// 10. CALCULATED TABLES & FIELD PARAMETERS
+// ==============================================================================================
+
+// Table: Date Table (Master Enterprise Calendar)
 Date Table = 
 ADDCOLUMNS(
     CALENDARAUTO(),
+
     "Year", YEAR([Date]),
-    "Year Quarter", FORMAT([Date], "YYYY-\QQ"),
-    "Month Number", MONTH([Date]),
-    "Month Name", FORMAT([Date], "mmmm"),
-    "Short Month", FORMAT([Date], "mmm"),
-    "Month Year", FORMAT([Date], "mmm yyyy"),
-    "Quarter", "Q" & FORMAT([Date], "Q"),
-    "Day of Week", WEEKDAY([Date], 2),
-    "Day Name", FORMAT([Date], "dddd"),
-    "Short Day", FORMAT([Date], "ddd"),
-    "Is Weekend", IF(WEEKDAY([Date], 2) IN {6, 7}, "Weekend", "Weekday")
+    "Quarter", "Q-" & QUARTER([Date]),
+
+    "Month", FORMAT([Date], "MMM"),
+    "Month Name", FORMAT([Date], "MMMM"),
+    "Month Num", MONTH([Date]),
+
+    "Weekday", FORMAT([Date], "DDD"),
+    "Weekday Name", FORMAT([Date], "DDDD"),
+    "Weekday Num", WEEKDAY([Date], 2),
+    "WeekType", IF(WEEKDAY([Date]) = 1 || WEEKDAY([Date]) = 7, "Weekend", "Weekday"),
+
+    "Year Month", FORMAT([Date], "YYYY-MMM"),
+    "YearMonthSort", YEAR([Date]) * 100 + MONTH([Date])
 )
 
+// Field Parameter: ChangeCalendar (Granularity Switcher for Time Series)
+ChangeCalendar = {
+    ("Month", NAMEOF('Date Table'[Month]), 0),
+    ("Quarter", NAMEOF('Date Table'[Quarter]), 1),
+    ("Weekday", NAMEOF('Date Table'[Weekday]), 2),
+    ("Year", NAMEOF('Date Table'[Year]), 3),
+    ("WeekType", NAMEOF('Date Table'[WeekType]), 4)
+}
 
-// =====================================================================================
-// 2. CALCULATED COLUMNS (Fact Table: Visits)
-// =====================================================================================
+// Field Parameter: ChangeMeasuresLineChart (Metric Switcher on Trend Visuals)
+ChangeMeasuresLineChart = {
+    ("Total Visits", NAMEOF('1DAX_Calculation'[Total Visits]), 0),
+    ("Total Admitted", NAMEOF('1DAX_Calculation'[Total Admitted]), 1),
+    ("Total Outpatient", NAMEOF('1DAX_Calculation'[Total Outpatient]), 2)
+}
 
-// Length of Stay in Days (Admitted to Discharge)
-Visits[Length of Stay] = 
-DATEDIFF(Visits[Admitted Date], Visits[Discharge Date], DAY)
+// Field Parameter: Patient Location Switch (City vs State Geographic Switcher)
+Patient Location Switch = {
+    ("City", NAMEOF('cities'[City]), 0),
+    ("State", NAMEOF('cities'[State]), 1)
+}
 
+Patient Location Switch 2 = {
+    ("City", NAMEOF('cities'[City]), 0),
+    ("State", NAMEOF('cities'[State]), 1)
+}
 
-// =====================================================================================
-// 3. BASE OPERATIONAL VOLUME MEASURES
-// =====================================================================================
-
-// Total Clinical Visits Encountered
-[Total Visits] = COUNTROWS(Visits)
-
-// Unique Patients Served
-[Total Patients] = DISTINCTCOUNT(Visits[Patient ID])
-
-// Inpatient Visits
-[Inpatient Visits] = 
-CALCULATE(
-    [Total Visits],
-    Visits[Service Type] = "Inpatient"
-)
-
-// Outpatient Visits
-[Outpatient Visits] = 
-CALCULATE(
-    [Total Visits],
-    Visits[Service Type] = "Outpatient"
-)
-
-// Emergency Admissions
-[Emergency Visits] = 
-CALCULATE(
-    [Total Visits],
-    Visits[Emergency Visit] = "Yes"
-)
-
-// Average Length of Stay (ALOS in Days)
-[Avg Length of Stay] = 
-AVERAGE(Visits[Length of Stay])
-
-
-// =====================================================================================
-// 4. FINANCIAL & REVENUE CYCLE MANAGEMENT (RCM) MEASURES
-// =====================================================================================
-
-// Total Room Charges (Iterator: Daily Room Rate * Length of Stay Days)
-[Total Room Charges] = 
-SUMX(
-    Visits,
-    COALESCE(Visits[Room Charges(daily rate)], 0) * COALESCE(Visits[Length of Stay], 0)
-)
-
-// Total Treatment / Procedure Charges
-[Total Treatment Cost] = SUM(Visits[Treatment Cost])
-
-// Total Pharmacy / Medication Charges
-[Total Medication Cost] = SUM(Visits[Medication Cost])
-
-// Total Gross Billing Revenue (£)
-[Total Billing Amount] = 
-[Total Medication Cost] + [Total Treatment Cost] + [Total Room Charges]
-
-// Total Insurance Covered / Reimbursed (£)
-[Total Insurance Coverage] = SUM(Visits[Insurance Coverage])
-
-// Patient Out-of-Pocket Expense (Self-Pay Liability)
-[Total Out Of Pocket] = 
-[Total Billing Amount] - [Total Insurance Coverage]
-
-// Insurance Coverage Ratio (%)
-[Insurance Coverage %] = 
-DIVIDE([Total Insurance Coverage], [Total Billing Amount], 0)
-
-// Out of Pocket Ratio (%)
-[Out Of Pocket %] = 
-DIVIDE([Total Out Of Pocket], [Total Billing Amount], 0)
-
-
-// =====================================================================================
-// 5. PER-VISIT UNIT ECONOMICS & AVERAGES (KPI Subtitle Metrics)
-// =====================================================================================
-
-// Average Gross Billing Revenue per Visit (£)
-[Avg Billing Amount Per Visit] = 
-DIVIDE([Total Billing Amount], [Total Visits], 0)
-
-// Average Medication Cost per Visit (£)
-[Avg Medication Cost] = 
-DIVIDE([Total Medication Cost], [Total Visits], 0)
-
-// Average Treatment Cost per Visit (£)
-[Avg Treatment Cost] = 
-DIVIDE([Total Treatment Cost], [Total Visits], 0)
-
-// Average Insurance Reimbursed per Visit (£)
-[Avg Insurance Coverage] = 
-DIVIDE([Total Insurance Coverage], [Total Visits], 0)
-
-// Average Room Charges per Visit (£)
-[Avg Room Charges] = 
-DIVIDE([Total Room Charges], [Total Visits], 0)
-
-// Average Out-of-Pocket Expense per Patient Visit (£)
-[Avg Out Of Pocket] = 
-DIVIDE([Total Out Of Pocket], [Total Visits], 0)
-
-
-// =====================================================================================
-// 6. CLINICAL DISTRIBUTION & RATIO MEASURES (Charts & Visuals)
-// =====================================================================================
-
-// Procedure % Share of Total Billing Amount (Denominator ignores visual slicing on Procedure)
-[% Total Billing by Procedure] = 
-DIVIDE(
-    [Total Billing Amount],
-    CALCULATE([Total Billing Amount], ALL(Visits[Procedure ID])),
-    0
-)
-
-// Diagnosis % Share of Total Billing Amount
-[% Total Billing by Diagnosis] = 
-DIVIDE(
-    [Total Billing Amount],
-    CALCULATE([Total Billing Amount], ALL(Visits[Diagnosis ID])),
-    0
-)
-
-// Department % Share of Total Billing Amount
-[% Total Billing by Department] = 
-DIVIDE(
-    [Total Billing Amount],
-    CALCULATE([Total Billing Amount], ALL(Visits[Department ID])),
-    0
-)
-
-// Blank Measure (UI Design Trick: Used for Clean Bar Label Offsets in Power BI)
-[Blank Measure] = BLANK()
-
-
-// =====================================================================================
-// 7. QUALITY OF CARE & SATISFACTION
-// =====================================================================================
-
-// Patient Satisfaction Average Score (1 - 10)
-[Avg Satisfaction Score] = 
-AVERAGE(Visits[Patient Satisfaction Score])
-
-// Paid Visit Revenue Compliance
-[Paid Visits %] = 
-DIVIDE(
-    CALCULATE([Total Visits], Visits[Payment Status] = "Paid"),
-    [Total Visits],
-    0
-)
+Parameter = {
+    ("Total Visits", NAMEOF('1DAX_Calculation'[Total Visits]), 0)
+}
