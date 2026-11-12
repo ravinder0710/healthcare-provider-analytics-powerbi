@@ -48,9 +48,11 @@ OLED-optimized dark theme engineered for clinical monitoring rooms and low-light
 
 ## 🏗️ Semantic Data Model Architecture (Star / Snowflake Schema)
 
-The analytical data model follows an enterprise Star/Snowflake architecture designed for optimal query traversal, filtering isolation, and zero ambiguity in aggregation.
+The analytical data model and end-to-end data processing workflow follows an enterprise Star/Snowflake architecture designed for optimal query traversal, filtering isolation, and zero ambiguity in aggregation.
 
-![Power BI Model View](screenshots/healthcare_model_view.png)
+<p align="center">
+  <img src="screenshots/healthcare_pipeline_architecture.png" alt="Healthcare Provider Data Architecture & RCM Pipeline" width="550" />
+</p>
 
 ### Entity Relationship Diagram
 ```mermaid
@@ -96,17 +98,32 @@ erDiagram
 
 ## 🎛️ Advanced DAX Engineering & Analytical Architecture
 
-### 1. Dynamic Field Parameters
-Field Parameters enable runtime restructuring of visuals without creating duplicate report pages.
+### 1. Dynamic Field Parameters (Zero Screenshot, Pure DAX Engine)
+Field Parameters enable runtime restructuring of visuals and time-series axes without duplicating report canvases:
 
-| Field Parameter | Parameter Options | Purpose |
-| :--- | :--- | :--- |
-| **`ChangeCalendar`** | Month, Quarter, Weekday, Year, WeekType | Switches time-series line chart X-axis dynamically |
-| **`ChangeMeasuresLineChart`** | Total Visits, Total Admitted, Total Outpatient | Allows stakeholders to switch trend visual metric on demand |
-| **`Patient Location Switch`** | City, State | Toggles UK map visual bubble aggregation hierarchy |
+```dax
+// 1. Time Series Granularity Switcher
+ChangeCalendar = {
+    ("Month", NAMEOF('Date Table'[Month]), 0),
+    ("Quarter", NAMEOF('Date Table'[Quarter]), 1),
+    ("Weekday", NAMEOF('Date Table'[Weekday]), 2),
+    ("Year", NAMEOF('Date Table'[Year]), 3),
+    ("WeekType", NAMEOF('Date Table'[WeekType]), 4)
+}
 
-![Field Parameter Measures](screenshots/healthcare_field_parameter_measures.png)
-![Field Parameter Calendar](screenshots/healthcare_field_parameter_calendar.png)
+// 2. Trend Visual Metric Switcher
+ChangeMeasuresLineChart = {
+    ("Total Visits", NAMEOF('1DAX_Calculation'[Total Visits]), 0),
+    ("Total Admitted", NAMEOF('1DAX_Calculation'[Total Admitted]), 1),
+    ("Total Outpatient", NAMEOF('1DAX_Calculation'[Total Outpatient]), 2)
+}
+
+// 3. Geographic Hierarchy Switcher (City vs State)
+Patient Location Switch = {
+    ("City", NAMEOF('cities'[City]), 0),
+    ("State", NAMEOF('cities'[State]), 1)
+}
+```
 
 ---
 
@@ -114,9 +131,23 @@ Field Parameters enable runtime restructuring of visuals without creating duplic
 
 #### A. Inpatient Length of Stay & Room Charge Iterators
 ```dax
-// Length of Stay (Calculated Column on Visits)
+// Length of Stay (Calculated Column on Fact Visits)
 Length of Stay = 
 DATEDIFF(Visits[Admitted Date], Visits[Discharge Date], DAY)
+
+// Length of Stays (Grouped Range Bucket)
+Length of Stays = 
+    VAR _AdmissionsDays = DATEDIFF(Visits[Admitted Date], Visits[Discharge Date], DAY)
+    VAR _GroupDays = 
+        SWITCH(
+            TRUE(),
+            _AdmissionsDays = 1, "1 Day",
+            _AdmissionsDays <= 4, "2-4",
+            _AdmissionsDays <= 7, "5-7",
+            TRUE(), "8+"
+        )
+    RETURN
+    IF(_AdmissionsDays = BLANK(), "", _GroupDays)
 
 // Total Room Charges (Iterator SUMX calculating Daily Rate * Stay Days)
 Total Room Charges = 
@@ -125,16 +156,50 @@ SUMX(
     Visits[Room Charges(daily rate)] * Visits[Length of Stay]
 )
 
-// Gross Billing Amount
+// Gross Billing Amount (Total Revenue Across All Cost Centers)
 Total Billing Amount = 
 [Total Medication Cost] + [Total Room Charges] + [Total Treatment Cost]
 
-// Patient Out of Pocket Obligation
+// Patient Out-of-Pocket Obligation
 Out Of Pocket = 
 [Total Billing Amount] - [Total Insurance Coverage]
 ```
 
-#### B. Dynamic Emergency / Non-Emergency Switcher
+#### B. Volume, Admission & Cost Base Measures
+```dax
+Total Visits = COUNTROWS(Visits)
+
+Total Patients = DISTINCTCOUNT(Visits[Patient ID])
+
+Total Providers = DISTINCTCOUNT(Visits[Provider ID])
+
+Total Outpatient = COUNTBLANK(Visits[Length of Stay])
+
+Total Admitted = [Total Visits] - [Total Outpatient]
+
+Total Medication Cost = SUM(Visits[Medication Cost])
+
+Total Treatment Cost = SUM(Visits[Treatment Cost])
+
+Total Insurance Coverage = SUM(Visits[Insurance Coverage])
+```
+
+#### C. Dual-Deck KPI Card Averages (Unit Economics Per Visit)
+```dax
+Avg Billing Per Visit = DIVIDE([Total Billing Amount], [Total Visits], 0)
+
+Avg Medication Cost = DIVIDE([Total Medication Cost], [Total Visits], 0)
+
+Avg Treatment Cost = DIVIDE([Total Treatment Cost], [Total Visits], 0)
+
+Avg Insurance Coverage = DIVIDE([Total Insurance Coverage], [Total Visits], 0)
+
+Avg Room Charges = DIVIDE([Total Room Charges], [Total Visits], 0)
+
+Avg Out Of Pocket = DIVIDE([Out Of Pocket], [Total Visits], 0)
+```
+
+#### D. Dynamic Emergency / Non-Emergency Switcher
 ```dax
 % Emergency = 
 VAR _TotalVisit = CALCULATE([Total Visits], visits[Visit Type] = "Emergency")
@@ -163,10 +228,97 @@ RETURN
         DIVIDE(_SwitchVar, _SwitchMeasures, 0),
         DIVIDE(_SwitchMeasures, _SwitchVar, 0)
     )
+
+% None Emergency = 
+VAR _TotalVisit = CALCULATE([Total Visits], visits[Visit Type] = "None Emergency")
+VAR _Admitted = CALCULATE([Total Admitted], visits[Visit Type] = "None Emergency")
+VAR _Outpatient = CALCULATE([Total Outpatient], visits[Visit Type] = "None Emergency")
+
+VAR _SwitchMeasures =
+    SWITCH(
+        TRUE(),
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, [Total Visits],
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, [Total Admitted],
+        [Total Outpatient]
+    )
+
+VAR _SwitchVar = 
+    SWITCH(
+        TRUE(),
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 0, _TotalVisit,
+        SELECTEDVALUE(ChangeMeasuresLineChart[ChangeMeasuresLineChart Order]) = 1, _Admitted,
+        _Outpatient
+    )
+
+RETURN
+    IF(
+        _SwitchVar < _SwitchMeasures,
+        DIVIDE(_SwitchVar, _SwitchMeasures, 0),
+        DIVIDE(_SwitchMeasures, _SwitchVar, 0)
+    )
+
+% R Emergency = 1.0 - [% Emergency]
+
+% R None Emergency = 1.0 - [% None Emergency]
+
+None Emergency Final = CALCULATE([Total Outpatient], Visits[Visit Type] = "None Emergency")
 ```
 
-#### C. Calendar Weekday WoW Growth via Custom Offset
+#### E. Clinical Contribution & Procedure Share (% of Grand Total)
 ```dax
+% Department = 
+DIVIDE(
+    [Total Billing Amount],
+    CALCULATE([Total Billing Amount], ALL(departments[Department]))
+)
+
+% Procedure = 
+DIVIDE(
+    [Total Billing Amount],
+    CALCULATE([Total Billing Amount], ALL(procedures[Procedure]))
+)
+
+Active Department = SELECTEDVALUE(departments[Department])
+```
+
+#### F. Patient Satisfaction Scoring
+```dax
+Avg Satisfaction Score = 
+VAR _Score =
+    AVERAGEX(
+        VALUES(visits[Provider ID]),
+        CALCULATE(AVERAGE(visits[Patient Satisfaction Score]))
+    )
+RETURN 
+    "Avg. Rating " & FORMAT(_Score, "0.00")
+
+Patient Satisfaction Score = 
+VAR _Score = 
+    AVERAGEX(
+        VALUES(visits[Provider ID]),
+        CALCULATE(AVERAGE('visits'[Patient Satisfaction Score]))
+    )
+RETURN
+    "Patient Satisfaction Score: " & FORMAT(_Score, "0.00")
+```
+
+#### G. Time Intelligence (MoM & WoW Growth via Weekday Offset)
+```dax
+Previous Month Billing Amount = 
+CALCULATE(
+    [Total Billing Amount],
+    DATEADD('Date Table'[Date], -1, MONTH)
+)
+
+MoM Growth Value = [Total Billing Amount] - [Previous Month Billing Amount]
+
+MoM Growth % = 
+DIVIDE(
+    [Total Billing Amount] - [Previous Month Billing Amount],
+    [Previous Month Billing Amount],
+    0
+)
+
 Previous Weekday Billing Amount = 
 VAR _CurrentWeekday = SELECTEDVALUE('Date Table'[Weekday])
 VAR _PreviousWeekday = 
@@ -187,6 +339,8 @@ RETURN
         ALL('Date Table')
     )
 
+WoW Growth Value = [Total Billing Amount] - [Previous Weekday Billing Amount]
+
 WoW Growth % = 
 DIVIDE(
     [Total Billing Amount] - [Previous Weekday Billing Amount],
@@ -195,12 +349,30 @@ DIVIDE(
 )
 ```
 
-#### D. Blank Measure Visual Overlay Technique
-To produce the clean horizontal bar chart with aligned department names and percentages:
+#### H. Visual Overlay Trick (Blank Measure for Label Positioning)
 ```dax
 Blank Measures = 0
 ```
-*Used as a secondary visual value to overlay custom labels without distorting bar length scale.*
+*Allows customized inline positioning of Department names and percentage contributions without skewing horizontal bar scaling.*
+
+#### I. Master Enterprise Calendar Table
+```dax
+Date Table = 
+ADDCOLUMNS(
+    CALENDARAUTO(),
+    "Year", YEAR([Date]),
+    "Quarter", "Q-" & QUARTER([Date]),
+    "Month", FORMAT([Date], "MMM"),
+    "Month Name", FORMAT([Date], "MMMM"),
+    "Month Num", MONTH([Date]),
+    "Weekday", FORMAT([Date], "DDD"),
+    "Weekday Name", FORMAT([Date], "DDDD"),
+    "Weekday Num", WEEKDAY([Date], 2),
+    "WeekType", IF(WEEKDAY([Date]) = 1 || WEEKDAY([Date]) = 7, "Weekend", "Weekday"),
+    "Year Month", FORMAT([Date], "YYYY-MMM"),
+    "YearMonthSort", YEAR([Date]) * 100 + MONTH([Date])
+)
+```
 
 ---
 
