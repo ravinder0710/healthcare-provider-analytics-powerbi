@@ -1,0 +1,18 @@
+# Power BI Backup and Auto-Recovery files
+*.tmp
+*.bak
+~$*
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+desktop.ini
